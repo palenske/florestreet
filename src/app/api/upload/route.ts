@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { upload } from '@vercel/blob'
+import { put } from '@vercel/blob'
 import { getUserFromRequest } from '@/lib/auth'
 
 export async function POST(req: Request) {
@@ -23,19 +23,19 @@ export async function POST(req: Request) {
     )
   }
 
-  const maxSize = 5 * 1024 * 1024 // 5MB
+  const maxSize = 4.5 * 1024 * 1024 // 4.5MB (Vercel Function limit)
   if (file.size > maxSize) {
     return NextResponse.json(
-      { error: 'Arquivo muito grande. Máximo 5MB' },
+      { error: 'Arquivo muito grande. Máximo 4.5MB' },
       { status: 400 }
     )
   }
 
   try {
     const extension = file.name.split('.').pop() || 'jpg'
-    const filename = `${user.id}/${Date.now()}.${extension}`
+    const filename = `points/${user.id}/${Date.now()}.${extension}`
 
-    const blob = await upload(filename, file, {
+    const blob = await put(filename, file, {
       access: 'public',
     })
 
