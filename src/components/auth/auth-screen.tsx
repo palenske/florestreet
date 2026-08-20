@@ -93,7 +93,7 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
             <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 mb-4">
               <Leaf className="w-9 h-9 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">Fora &amp; Flora</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Florestreet</h1>
             <p className="text-sm text-muted-foreground mt-2 max-w-xs leading-relaxed">
               Catalogue árvores frutíferas, flores e ervas ao seu redor. Compartilhe com amigos.
             </p>

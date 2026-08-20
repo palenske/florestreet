@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fora & Flora — Catálogo de pontos de coleta",
+  title: "Florestreet — Catálogo de pontos de coleta",
   description:
     "Catalogue árvores frutíferas, flores e ervas ao seu redor. Marque locais, compartilhe com amigos e descubra pontos de coleta perto de você.",
   keywords: [
@@ -29,19 +29,19 @@ export const metadata: Metadata = {
     "foraging",
     "plantas",
   ],
-  authors: [{ name: "Fora & Flora" }],
+  authors: [{ name: "Florestreet" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "Fora & Flora",
+    title: "Florestreet",
     description: "Catálogo colaborativo de pontos de coleta de frutas, flores e ervas.",
-    siteName: "Fora & Flora",
+    siteName: "Florestreet",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fora & Flora",
+    title: "Florestreet",
     description: "Catálogo colaborativo de pontos de coleta de frutas, flores e ervas.",
   },
 };

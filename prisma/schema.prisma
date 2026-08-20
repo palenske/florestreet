@@ -1,4 +1,4 @@
-// Prisma schema for Fora & Flora - collection points catalog
+// Prisma schema for Florestreet - collection points catalog
 // Multi-tenant by user: each user owns their points and can share with friends
 
 generator client {
