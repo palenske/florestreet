@@ -1,0 +1,95 @@
+// Prisma schema for Fora & Flora - collection points catalog
+// Multi-tenant by user: each user owns their points and can share with friends
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  avatar       String?
+  bio          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  points         CollectionPoint[]
+  friendsFrom    Friendship[]      @relation("friendRequester")
+  friendsTo      Friendship[]      @relation("friendReceiver")
+  sharesGiven    SharedPoint[]     @relation("sharedBy")
+  sharesReceived SharedPoint[]     @relation("sharedWith")
+  sessions       Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CollectionPoint {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String   // fruit | flower | herb
+  hasFruit    Boolean  @default(false)
+  imageUrl    String?
+  latitude    Float
+  longitude   Float
+  address     String?
+  notes       String?
+  recordedAt  DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  shares SharedPoint[]
+
+  @@index([userId])
+  @@index([type])
+}
+
+model Friendship {
+  id         String   @id @default(cuid())
+  requesterId String
+  receiverId String
+  status     String   @default("pending") // pending | accepted | declined
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  requester User @relation("friendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver User @relation("friendReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+  @@index([receiverId, status])
+}
+
+model SharedPoint {
+  id           String   @id @default(cuid())
+  pointId      String
+  sharedById   String
+  sharedWithId String
+  createdAt    DateTime @default(now())
+
+  point      CollectionPoint @relation(fields: [pointId], references: [id], onDelete: Cascade)
+  sharedBy   User            @relation("sharedBy", fields: [sharedById], references: [id], onDelete: Cascade)
+  sharedWith User            @relation("sharedWith", fields: [sharedWithId], references: [id], onDelete: Cascade)
+
+  @@unique([pointId, sharedWithId])
+  @@index([sharedWithId])
+}
