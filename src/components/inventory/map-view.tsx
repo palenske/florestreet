@@ -259,7 +259,7 @@ export default function MapView({
       <Sheet open={showList} onOpenChange={setShowList}>
         <SheetContent
           side="bottom"
-          className="h-[70vh] sm:max-w-md sm:mx-auto sm:rounded-t-2xl p-0 flex flex-col z-[100]"
+          className="h-[70vh] sm:max-w-md sm:mx-auto sm:rounded-t-2xl p-0 flex flex-col"
         >
           <SheetHeader className="px-4 pt-4 pb-3 border-b shrink-0">
             <SheetTitle className="flex items-center gap-2 text-base">

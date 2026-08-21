@@ -134,7 +134,7 @@ export default function PointDetail({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-[88vh] sm:max-w-2xl sm:mx-auto sm:rounded-t-2xl p-0 flex flex-col z-[100]"
+        className="h-[88vh] sm:max-w-2xl sm:mx-auto sm:rounded-t-2xl p-0 flex flex-col"
       >
         <SheetHeader className="px-5 pt-5 pb-3 border-b shrink-0">
           <SheetTitle className="flex items-center gap-2 text-left">

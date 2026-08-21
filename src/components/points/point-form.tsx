@@ -189,7 +189,7 @@ export default function PointForm({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-[92vh] sm:max-w-2xl sm:mx-auto sm:rounded-t-2xl p-0 flex flex-col z-[100]"
+        className="h-[92vh] sm:max-w-2xl sm:mx-auto sm:rounded-t-2xl p-0 flex flex-col"
       >
         <SheetHeader className="px-5 pt-5 pb-3 border-b shrink-0">
           <SheetTitle>{isEdit ? 'Editar ponto' : 'Novo ponto de coleta'}</SheetTitle>
@@ -336,7 +336,7 @@ export default function PointForm({
 
             {/* Photo source dialog */}
             <AlertDialog open={photoDialogOpen} onOpenChange={setPhotoDialogOpen}>
-              <AlertDialogContent className="z-[200]">
+              <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Adicionar foto</AlertDialogTitle>
                   <AlertDialogDescription>
