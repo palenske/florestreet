@@ -18,7 +18,16 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet'
-import { Loader2, MapPin, ImagePlus, X, Locate, Sparkles, Check } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog'
+import { Loader2, MapPin, ImagePlus, X, Locate, Sparkles, Check, Camera, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { POINT_TYPE_META, type PointType, type CollectionPointDTO } from '@/lib/types'
 import { createPointSchema, type CreatePointInput } from '@/lib/schemas/point'
@@ -41,7 +50,9 @@ export default function PointForm({
 }: PointFormProps) {
   const isEdit = !!initial
   const [uploading, setUploading] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const [photoDialogOpen, setPhotoDialogOpen] = useState(false)
+  const galleryRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
 
   const {
     location: geoLocation,
@@ -283,7 +294,7 @@ export default function PointForm({
               ) : (
                 <button
                   type="button"
-                  onClick={() => fileRef.current?.click()}
+                  onClick={() => setPhotoDialogOpen(true)}
                   disabled={uploading}
                   className="w-full h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-colors flex flex-col items-center justify-center text-muted-foreground"
                   aria-label="Enviar foto do ponto"
@@ -299,7 +310,7 @@ export default function PointForm({
                 </button>
               )}
               <input
-                ref={fileRef}
+                ref={galleryRef}
                 type="file"
                 accept="image/*"
                 className="sr-only"
@@ -309,7 +320,68 @@ export default function PointForm({
                   e.target.value = ''
                 }}
               />
+              <input
+                ref={cameraRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) handleUpload(f)
+                  e.target.value = ''
+                }}
+              />
             </div>
+
+            {/* Photo source dialog */}
+            <AlertDialog open={photoDialogOpen} onOpenChange={setPhotoDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Adicionar foto</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Como você quer adicionar a foto do ponto de coleta?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="flex flex-col gap-2 py-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPhotoDialogOpen(false)
+                      cameraRef.current?.click()
+                    }}
+                    className="flex items-center gap-3 p-4 rounded-xl border hover:bg-accent transition-colors text-left"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Camera className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Tirar foto</p>
+                      <p className="text-xs text-muted-foreground">Usar a câmera do dispositivo</p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPhotoDialogOpen(false)
+                      galleryRef.current?.click()
+                    }}
+                    className="flex items-center gap-3 p-4 rounded-xl border hover:bg-accent transition-colors text-left"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <ImageIcon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Escolher da galeria</p>
+                      <p className="text-xs text-muted-foreground">Selecionar uma foto existente</p>
+                    </div>
+                  </button>
+                </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             {/* Name */}
             <div className="space-y-2">
