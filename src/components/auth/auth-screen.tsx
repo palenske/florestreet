@@ -19,7 +19,7 @@ interface AuthScreenProps {
 
 const features = [
   { icon: MapPin, text: 'Marque pontos no mapa com sua localização' },
-  { icon: Sparkles, text: 'Catalogue frutas, flores e ervas com fotos' },
+  { icon: Sparkles, text: 'Catalogue frutas, flores, ervas e ornamentais com fotos' },
   { icon: Users, text: 'Compartilhe locais com amigos' },
 ]
 
@@ -89,7 +89,7 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
             </div>
             <h1 className="text-2xl font-semibold tracking-tight">Florestreet</h1>
             <p className="text-sm text-muted-foreground mt-2 max-w-xs leading-relaxed">
-              Catalogue árvores frutíferas, flores e ervas ao seu redor. Compartilhe com amigos.
+              Catalogue árvores frutíferas, flores, ervas e plantas ornamentais ao seu redor. Compartilhe com amigos.
             </p>
           </div>
 

@@ -1,6 +1,6 @@
 // Type definitions shared across the app
 
-export type PointType = 'fruit' | 'flower' | 'herb'
+export type PointType = 'fruit' | 'flower' | 'herb' | 'ornamental'
 
 export interface CollectionPointDTO {
   id: string
@@ -65,5 +65,11 @@ export const POINT_TYPE_META: Record<
     emoji: '🌿',
     color: '#16a34a', // green-600
     description: 'Ervas, temperos e plantas aromáticas',
+  },
+  ornamental: {
+    label: 'Ornamental',
+    emoji: '🪴',
+    color: '#8b5cf6', // violet-500
+    description: 'Plantas para decoração ou com aromas',
   },
 }

@@ -44,7 +44,7 @@ model CollectionPoint {
   id          String   @id @default(cuid())
   name        String
   description String?
-  type        String   // fruit | flower | herb
+  type        String   // fruit | flower | herb | ornamental
   hasFruit    Boolean  @default(false)
   imageUrl    String?
   latitude    Float

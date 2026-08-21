@@ -402,7 +402,7 @@ export default function PointForm({
             {/* Type */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Tipo *</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {(Object.keys(POINT_TYPE_META) as PointType[]).map((t) => {
                   const meta = POINT_TYPE_META[t]
                   const active = type === t

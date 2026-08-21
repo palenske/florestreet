@@ -67,7 +67,7 @@ export default function InventoryList({
           value={typeFilter}
           onValueChange={(v) => onTypeFilterChange(v as PointType | 'all')}
         >
-          <TabsList className="grid grid-cols-4 w-full h-9">
+          <TabsList className="grid grid-cols-5 w-full h-9">
             <TabsTrigger value="all" className="text-xs">
               Todos
             </TabsTrigger>
@@ -99,7 +99,7 @@ export default function InventoryList({
             description={
               points.length > 0
                 ? 'Tente ajustar a busca ou filtros para encontrar seus pontos.'
-                : 'Catalogue o primeiro ponto: uma árvore frutífera, flor ou erva próxima de você.'
+                : 'Catalogue o primeiro ponto: uma árvore frutífera, flor, erva ou planta ornamental próxima de você.'
             }
             actionLabel={points.length === 0 ? 'Adicionar primeiro ponto' : undefined}
             onAction={points.length === 0 ? onAddClick : undefined}

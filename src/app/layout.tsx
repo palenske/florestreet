@@ -18,11 +18,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Florestreet — Catálogo de pontos de coleta",
   description:
-    "Catalogue árvores frutíferas, flores e ervas ao seu redor. Marque locais, compartilhe com amigos e descubra pontos de coleta perto de você.",
+    "Catalogue árvores frutíferas, flores, ervas e plantas ornamentais ao seu redor. Marque locais, compartilhe com amigos e descubra pontos de coleta perto de você.",
   keywords: [
     "frutas",
     "flores",
     "ervas",
+    "ornamentais",
     "coleta",
     "mapa",
     "geolocalização",
@@ -35,14 +36,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Florestreet",
-    description: "Catálogo colaborativo de pontos de coleta de frutas, flores e ervas.",
+    description: "Catálogo colaborativo de pontos de coleta de frutas, flores, ervas e ornamentais.",
     siteName: "Florestreet",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Florestreet",
-    description: "Catálogo colaborativo de pontos de coleta de frutas, flores e ervas.",
+    description: "Catálogo colaborativo de pontos de coleta de frutas, flores, ervas e ornamentais.",
   },
 };
 
