@@ -336,7 +336,7 @@ export default function PointForm({
 
             {/* Photo source dialog */}
             <AlertDialog open={photoDialogOpen} onOpenChange={setPhotoDialogOpen}>
-              <AlertDialogContent>
+              <AlertDialogContent className="z-[200]">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Adicionar foto</AlertDialogTitle>
                   <AlertDialogDescription>
