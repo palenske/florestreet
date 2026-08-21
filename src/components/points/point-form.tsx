@@ -75,32 +75,32 @@ export default function PointForm({
   } = useGeolocation()
 
   useEffect(() => {
-    if (open) {
-      if (initial) {
-        setName(initial.name)
-        setDescription(initial.description ?? '')
-        setType(initial.type)
-        setHasFruit(initial.hasFruit)
-        setImageUrl(initial.imageUrl)
-        setLatitude(initial.latitude)
-        setLongitude(initial.longitude)
-        setAddress(initial.address ?? '')
-        setNotes(initial.notes ?? '')
-        setRecordedAt(new Date(initial.recordedAt).toISOString().slice(0, 10))
-      } else {
-        setName('')
-        setDescription('')
-        setType('fruit')
-        setHasFruit(false)
-        setImageUrl(null)
-        setLatitude(geoLocation?.latitude ?? null)
-        setLongitude(geoLocation?.longitude ?? null)
-        setAddress('')
-        setNotes('')
-        setRecordedAt(new Date().toISOString().slice(0, 10))
-      }
+    if (!open) return
+    if (initial) {
+      setName(initial.name)
+      setDescription(initial.description ?? '')
+      setType(initial.type)
+      setHasFruit(initial.hasFruit)
+      setImageUrl(initial.imageUrl)
+      setLatitude(initial.latitude)
+      setLongitude(initial.longitude)
+      setAddress(initial.address ?? '')
+      setNotes(initial.notes ?? '')
+      setRecordedAt(new Date(initial.recordedAt).toISOString().slice(0, 10))
+    } else {
+      setName('')
+      setDescription('')
+      setType('fruit')
+      setHasFruit(false)
+      setImageUrl(null)
+      setLatitude(null)
+      setLongitude(null)
+      setAddress('')
+      setNotes('')
+      setRecordedAt(new Date().toISOString().slice(0, 10))
     }
-  }, [open, initial, geoLocation])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initial])
 
   async function handleUpload(file: File) {
     setUploading(true)
@@ -319,8 +319,7 @@ export default function PointForm({
                 ref={fileRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
-                className="hidden"
+                className="sr-only"
                 onChange={(e) => {
                   const f = e.target.files?.[0]
                   if (f) handleUpload(f)
