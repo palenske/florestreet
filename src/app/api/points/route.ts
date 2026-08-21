@@ -1,21 +1,8 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getUserFromRequest } from '@/lib/auth'
-import { z } from 'zod'
+import { createPointSchema } from '@/lib/schemas/point'
 import type { CollectionPointDTO, PointType } from '@/lib/types'
-
-const createSchema = z.object({
-  name: z.string().min(2).max(120),
-  description: z.string().max(2000).optional().nullable(),
-  type: z.enum(['fruit', 'flower', 'herb']),
-  hasFruit: z.boolean(),
-  imageUrl: z.string().optional().nullable(),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
-  address: z.string().max(300).optional().nullable(),
-  notes: z.string().max(2000).optional().nullable(),
-  recordedAt: z.string().optional(),
-})
 
 function serialize(p: {
   id: string
@@ -160,7 +147,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json()
-  const parsed = createSchema.safeParse(body)
+  const parsed = createPointSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' },

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Loader2, Leaf, Mail, Lock, User as UserIcon, Sparkles, MapPin, Users } from 'lucide-react'
 import { toast } from 'sonner'
+import { loginSchema, signupSchema, type LoginInput, type SignupInput } from '@/lib/schemas/auth'
 import type { UserDTO } from '@/lib/types'
 
 interface AuthScreenProps {
@@ -22,64 +25,55 @@ const features = [
 
 export default function AuthScreen({ onAuth }: AuthScreenProps) {
   const [tab, setTab] = useState<'login' | 'signup'>('login')
-  const [loading, setLoading] = useState(false)
 
-  // login state
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
+  const loginForm = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  })
 
-  // signup state
-  const [signupName, setSignupName] = useState('')
-  const [signupEmail, setSignupEmail] = useState('')
-  const [signupPassword, setSignupPassword] = useState('')
+  const signupForm = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { name: '', email: '', password: '' },
+  })
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+  const { isSubmitting: loginLoading } = loginForm.formState
+  const { isSubmitting: signupLoading } = signupForm.formState
+
+  async function handleLogin(data: LoginInput) {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+        body: JSON.stringify(data),
       })
-      const data = await res.json()
+      const result = await res.json()
       if (!res.ok) {
-        toast.error(data.error ?? 'Erro ao entrar')
+        toast.error(result.error ?? 'Erro ao entrar')
         return
       }
-      toast.success(`Bem-vindo de volta, ${data.user.name.split(' ')[0]}!`)
-      onAuth(data.user)
+      toast.success(`Bem-vindo de volta, ${result.user.name.split(' ')[0]}!`)
+      onAuth(result.user)
     } catch {
       toast.error('Erro de rede. Verifique sua conexão.')
-    } finally {
-      setLoading(false)
     }
   }
 
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+  async function handleSignup(data: SignupInput) {
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: signupName,
-          email: signupEmail,
-          password: signupPassword,
-        }),
+        body: JSON.stringify(data),
       })
-      const data = await res.json()
+      const result = await res.json()
       if (!res.ok) {
-        toast.error(data.error ?? 'Erro ao cadastrar')
+        toast.error(result.error ?? 'Erro ao cadastrar')
         return
       }
-      toast.success(`Conta criada! Bem-vindo, ${data.user.name.split(' ')[0]}!`)
-      onAuth(data.user)
+      toast.success(`Conta criada! Bem-vindo, ${result.user.name.split(' ')[0]}!`)
+      onAuth(result.user)
     } catch {
       toast.error('Erro de rede. Verifique sua conexão.')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -126,7 +120,7 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
                   <CardDescription className="text-sm mt-1">
                     Entre para ver seus pontos e os compartilhados com você.
                   </CardDescription>
-                  <form onSubmit={handleLogin} className="mt-5 space-y-4">
+                  <form onSubmit={loginForm.handleSubmit(handleLogin)} className="mt-5 space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">E-mail</Label>
                       <div className="relative">
@@ -134,14 +128,18 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
                         <Input
                           id="login-email"
                           type="email"
-                          required
                           autoComplete="email"
                           placeholder="voce@exemplo.com"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
+                          {...loginForm.register('email')}
                           className="pl-9"
+                          aria-invalid={!!loginForm.formState.errors.email}
                         />
                       </div>
+                      {loginForm.formState.errors.email && (
+                        <p className="text-xs text-destructive">
+                          {loginForm.formState.errors.email.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -152,17 +150,21 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
                         <Input
                           id="login-password"
                           type="password"
-                          required
                           autoComplete="current-password"
                           placeholder="••••••••"
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
+                          {...loginForm.register('password')}
                           className="pl-9"
+                          aria-invalid={!!loginForm.formState.errors.password}
                         />
                       </div>
+                      {loginForm.formState.errors.password && (
+                        <p className="text-xs text-destructive">
+                          {loginForm.formState.errors.password.message}
+                        </p>
+                      )}
                     </div>
-                    <Button type="submit" disabled={loading} className="w-full">
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Entrar'}
+                    <Button type="submit" disabled={loginLoading} className="w-full">
+                      {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Entrar'}
                     </Button>
                   </form>
                 </TabsContent>
@@ -171,7 +173,7 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
                   <CardDescription className="text-sm mt-1">
                     Comece a catalogar seus pontos de coleta em segundos.
                   </CardDescription>
-                  <form onSubmit={handleSignup} className="mt-5 space-y-4">
+                  <form onSubmit={signupForm.handleSubmit(handleSignup)} className="mt-5 space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">Nome</Label>
                       <div className="relative">
@@ -179,14 +181,18 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
                         <Input
                           id="signup-name"
                           type="text"
-                          required
                           autoComplete="name"
                           placeholder="Seu nome"
-                          value={signupName}
-                          onChange={(e) => setSignupName(e.target.value)}
+                          {...signupForm.register('name')}
                           className="pl-9"
+                          aria-invalid={!!signupForm.formState.errors.name}
                         />
                       </div>
+                      {signupForm.formState.errors.name && (
+                        <p className="text-xs text-destructive">
+                          {signupForm.formState.errors.name.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">E-mail</Label>
@@ -195,14 +201,18 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
                         <Input
                           id="signup-email"
                           type="email"
-                          required
                           autoComplete="email"
                           placeholder="voce@exemplo.com"
-                          value={signupEmail}
-                          onChange={(e) => setSignupEmail(e.target.value)}
+                          {...signupForm.register('email')}
                           className="pl-9"
+                          aria-invalid={!!signupForm.formState.errors.email}
                         />
                       </div>
+                      {signupForm.formState.errors.email && (
+                        <p className="text-xs text-destructive">
+                          {signupForm.formState.errors.email.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Senha</Label>
@@ -211,21 +221,24 @@ export default function AuthScreen({ onAuth }: AuthScreenProps) {
                         <Input
                           id="signup-password"
                           type="password"
-                          required
-                          minLength={6}
                           autoComplete="new-password"
                           placeholder="Mínimo 6 caracteres"
-                          value={signupPassword}
-                          onChange={(e) => setSignupPassword(e.target.value)}
+                          {...signupForm.register('password')}
                           className="pl-9"
+                          aria-invalid={!!signupForm.formState.errors.password}
                         />
                       </div>
+                      {signupForm.formState.errors.password && (
+                        <p className="text-xs text-destructive">
+                          {signupForm.formState.errors.password.message}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground">
                         Use ao menos 6 caracteres para sua segurança.
                       </p>
                     </div>
-                    <Button type="submit" disabled={loading} className="w-full">
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Criar conta'}
+                    <Button type="submit" disabled={signupLoading} className="w-full">
+                      {signupLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Criar conta'}
                     </Button>
                   </form>
                 </TabsContent>

@@ -1,20 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getUserFromRequest } from '@/lib/auth'
-import { z } from 'zod'
-
-const updateSchema = z.object({
-  name: z.string().min(2).max(120).optional(),
-  description: z.string().max(2000).optional().nullable(),
-  type: z.enum(['fruit', 'flower', 'herb']).optional(),
-  hasFruit: z.boolean().optional(),
-  imageUrl: z.string().optional().nullable(),
-  latitude: z.number().min(-90).max(90).optional(),
-  longitude: z.number().min(-180).max(180).optional(),
-  address: z.string().max(300).optional().nullable(),
-  notes: z.string().max(2000).optional().nullable(),
-  recordedAt: z.string().optional(),
-})
+import { updatePointSchema } from '@/lib/schemas/point'
 
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const user = await getUserFromRequest()
@@ -88,7 +75,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   }
 
   const body = await req.json()
-  const parsed = updateSchema.safeParse(body)
+  const parsed = updatePointSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' },

@@ -2,18 +2,12 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { createSession, setSessionCookie } from '@/lib/auth'
-import { z } from 'zod'
-
-const schema = z.object({
-  name: z.string().min(2, 'Nome muito curto'),
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha precisa ter ao menos 6 caracteres'),
-})
+import { signupSchema } from '@/lib/schemas/auth'
 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const parsed = schema.safeParse(body)
+    const parsed = signupSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' },

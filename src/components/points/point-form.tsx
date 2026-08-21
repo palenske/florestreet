@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,22 +21,10 @@ import {
 import { Loader2, MapPin, ImagePlus, X, Locate, Sparkles, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { POINT_TYPE_META, type PointType, type CollectionPointDTO } from '@/lib/types'
+import { createPointSchema, type CreatePointInput } from '@/lib/schemas/point'
 import CollectionMap from '@/components/map/collection-map'
 import { useGeolocation } from '@/hooks/use-geolocation'
 import { formatAccuracy } from '@/lib/format'
-
-export interface PointFormValues {
-  name: string
-  description: string
-  type: PointType
-  hasFruit: boolean
-  imageUrl: string | null
-  latitude: number
-  longitude: number
-  address: string
-  notes: string
-  recordedAt: string
-}
 
 interface PointFormProps {
   open: boolean
@@ -50,23 +40,9 @@ export default function PointForm({
   initial,
 }: PointFormProps) {
   const isEdit = !!initial
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [type, setType] = useState<PointType>('fruit')
-  const [hasFruit, setHasFruit] = useState(false)
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [latitude, setLatitude] = useState<number | null>(null)
-  const [longitude, setLongitude] = useState<number | null>(null)
-  const [address, setAddress] = useState('')
-  const [notes, setNotes] = useState('')
-  const [recordedAt, setRecordedAt] = useState<string>(
-    new Date().toISOString().slice(0, 10)
-  )
   const [uploading, setUploading] = useState(false)
-  const [saving, setSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // Use shared geo context
   const {
     location: geoLocation,
     loading: geoLoading,
@@ -74,33 +50,75 @@ export default function PointForm({
     request: requestGeo,
   } = useGeolocation()
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CreatePointInput>({
+    resolver: zodResolver(createPointSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      type: 'fruit',
+      hasFruit: false,
+      imageUrl: null,
+      latitude: null as unknown as number,
+      longitude: null as unknown as number,
+      address: '',
+      notes: '',
+      recordedAt: new Date().toISOString().slice(0, 10),
+    },
+  })
+
+  const type = watch('type')
+  const hasFruit = watch('hasFruit')
+  const latitude = watch('latitude')
+  const longitude = watch('longitude')
+  const name = watch('name')
+  const imageUrl = watch('imageUrl')
+
+  // Reset form when sheet opens/closes
   useEffect(() => {
     if (!open) return
     if (initial) {
-      setName(initial.name)
-      setDescription(initial.description ?? '')
-      setType(initial.type)
-      setHasFruit(initial.hasFruit)
-      setImageUrl(initial.imageUrl)
-      setLatitude(initial.latitude)
-      setLongitude(initial.longitude)
-      setAddress(initial.address ?? '')
-      setNotes(initial.notes ?? '')
-      setRecordedAt(new Date(initial.recordedAt).toISOString().slice(0, 10))
+      reset({
+        name: initial.name,
+        description: initial.description ?? '',
+        type: initial.type,
+        hasFruit: initial.hasFruit,
+        imageUrl: initial.imageUrl,
+        latitude: initial.latitude,
+        longitude: initial.longitude,
+        address: initial.address ?? '',
+        notes: initial.notes ?? '',
+        recordedAt: new Date(initial.recordedAt).toISOString().slice(0, 10),
+      })
     } else {
-      setName('')
-      setDescription('')
-      setType('fruit')
-      setHasFruit(false)
-      setImageUrl(null)
-      setLatitude(null)
-      setLongitude(null)
-      setAddress('')
-      setNotes('')
-      setRecordedAt(new Date().toISOString().slice(0, 10))
+      reset({
+        name: '',
+        description: '',
+        type: 'fruit',
+        hasFruit: false,
+        imageUrl: null,
+        latitude: null as unknown as number,
+        longitude: null as unknown as number,
+        address: '',
+        notes: '',
+        recordedAt: new Date().toISOString().slice(0, 10),
+      })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial])
+
+  // Sync geoLocation to form fields when fresh
+  useEffect(() => {
+    if (open && !isEdit && geoLocation) {
+      setValue('latitude', geoLocation.latitude)
+      setValue('longitude', geoLocation.longitude)
+    }
+  }, [geoLocation?.latitude, geoLocation?.longitude, open, isEdit, setValue])
 
   async function handleUpload(file: File) {
     setUploading(true)
@@ -113,7 +131,7 @@ export default function PointForm({
         toast.error(data.error ?? 'Falha no upload')
         return
       }
-      setImageUrl(data.url)
+      setValue('imageUrl', data.url)
       toast.success('Imagem enviada')
     } catch {
       toast.error('Erro de rede no upload')
@@ -124,67 +142,33 @@ export default function PointForm({
 
   function handleUseLocation() {
     requestGeo()
-    // Watch for new location
-    const interval = setInterval(() => {
-      // No-op, just rely on context
-    }, 500)
-    setTimeout(() => {
-      clearInterval(interval)
-    }, 5000)
   }
 
-  // Sync geoLocation to form fields when fresh
-  useEffect(() => {
-    if (open && !isEdit && geoLocation) {
-      setLatitude(geoLocation.latitude)
-      setLongitude(geoLocation.longitude)
+  async function onSubmit(data: CreatePointInput) {
+    const payload = {
+      ...data,
+      name: data.name.trim(),
+      description: data.description?.trim() || null,
+      address: data.address?.trim() || null,
+      notes: data.notes?.trim() || null,
+      recordedAt: new Date(data.recordedAt ?? new Date().toISOString().slice(0, 10)).toISOString(),
     }
-  }, [geoLocation?.latitude, geoLocation?.longitude, open, isEdit])
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (latitude == null || longitude == null) {
-      toast.error('Selecione o local no mapa ou use sua localização')
+    const url = isEdit ? `/api/points/${initial!.id}` : '/api/points'
+    const method = isEdit ? 'PATCH' : 'POST'
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const result = await res.json()
+    if (!res.ok) {
+      toast.error(result.error ?? 'Erro ao salvar')
       return
     }
-    if (!name.trim()) {
-      toast.error('Dê um nome ao ponto')
-      return
-    }
-    setSaving(true)
-    try {
-      const payload = {
-        name: name.trim(),
-        description: description.trim() || null,
-        type,
-        hasFruit,
-        imageUrl,
-        latitude,
-        longitude,
-        address: address.trim() || null,
-        notes: notes.trim() || null,
-        recordedAt: new Date(recordedAt).toISOString(),
-      }
-      const url = isEdit ? `/api/points/${initial!.id}` : '/api/points'
-      const method = isEdit ? 'PATCH' : 'POST'
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error ?? 'Erro ao salvar')
-        return
-      }
-      toast.success(isEdit ? 'Ponto atualizado!' : 'Ponto adicionado ao inventário!')
-      onSaved(data.point)
-      onOpenChange(false)
-    } catch {
-      toast.error('Erro de rede')
-    } finally {
-      setSaving(false)
-    }
+    toast.success(isEdit ? 'Ponto atualizado!' : 'Ponto adicionado ao inventário!')
+    onSaved(result.point)
+    onOpenChange(false)
   }
 
   const pickedLocation =
@@ -206,7 +190,7 @@ export default function PointForm({
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          <form id="point-form" onSubmit={handleSubmit} className="p-5 space-y-5">
+          <form id="point-form" onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-5">
             {/* Map for picking location */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -242,8 +226,8 @@ export default function PointForm({
                   pickingMode
                   pickedLocation={pickedLocation}
                   onMapClick={(lat, lng) => {
-                    setLatitude(lat)
-                    setLongitude(lng)
+                    setValue('latitude', lat)
+                    setValue('longitude', lng)
                   }}
                   center={
                     pickedLocation
@@ -284,13 +268,12 @@ export default function PointForm({
               <Label className="text-sm font-medium">Foto</Label>
               {imageUrl ? (
                 <div className="relative rounded-xl overflow-hidden border">
-                  { }
                   <img src={imageUrl} alt={`Foto de ${name || 'novo ponto'}`} className="w-full h-48 object-cover" />
                   <Button
                     type="button"
                     size="icon"
                     variant="secondary"
-                    onClick={() => setImageUrl(null)}
+                    onClick={() => setValue('imageUrl', null)}
                     className="absolute top-2 right-2 h-8 w-8 rounded-full shadow"
                     aria-label="Remover foto"
                   >
@@ -335,12 +318,13 @@ export default function PointForm({
               </Label>
               <Input
                 id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register('name')}
                 placeholder="Ex: Jabuticabeira da esquina"
-                required
-                maxLength={120}
+                aria-invalid={!!errors.name}
               />
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name.message}</p>
+              )}
             </div>
 
             {/* Type */}
@@ -354,7 +338,7 @@ export default function PointForm({
                     <button
                       key={t}
                       type="button"
-                      onClick={() => setType(t)}
+                      onClick={() => setValue('type', t)}
                       aria-pressed={active}
                       className={`rounded-xl border p-3 flex flex-col items-center gap-1 transition-all relative ${
                         active
@@ -391,7 +375,11 @@ export default function PointForm({
                     </p>
                   </div>
                 </div>
-                <Switch checked={hasFruit} onCheckedChange={setHasFruit} aria-label="Marcar se tem fruto hoje" />
+                <Switch
+                  checked={hasFruit}
+                  onCheckedChange={(v) => setValue('hasFruit', v)}
+                  aria-label="Marcar se tem fruto hoje"
+                />
               </CardContent>
             </Card>
 
@@ -402,12 +390,14 @@ export default function PointForm({
               </Label>
               <Textarea
                 id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                {...register('description')}
                 placeholder="Descreva a planta, altura, acesso, etc."
                 rows={3}
-                maxLength={2000}
+                aria-invalid={!!errors.description}
               />
+              {errors.description && (
+                <p className="text-xs text-destructive">{errors.description.message}</p>
+              )}
             </div>
 
             {/* Address */}
@@ -417,11 +407,13 @@ export default function PointForm({
               </Label>
               <Input
                 id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                {...register('address')}
                 placeholder="Ex: Rua das Flores, 123 — altura do mercado"
-                maxLength={300}
+                aria-invalid={!!errors.address}
               />
+              {errors.address && (
+                <p className="text-xs text-destructive">{errors.address.message}</p>
+              )}
             </div>
 
             {/* Notes */}
@@ -431,12 +423,14 @@ export default function PointForm({
               </Label>
               <Textarea
                 id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                {...register('notes')}
                 placeholder="Notas internas: horário de coleta, cuidadores, etc."
                 rows={2}
-                maxLength={2000}
+                aria-invalid={!!errors.notes}
               />
+              {errors.notes && (
+                <p className="text-xs text-destructive">{errors.notes.message}</p>
+              )}
             </div>
 
             {/* Recorded at */}
@@ -447,10 +441,12 @@ export default function PointForm({
               <Input
                 id="recordedAt"
                 type="date"
-                value={recordedAt}
-                onChange={(e) => setRecordedAt(e.target.value)}
-                required
+                {...register('recordedAt')}
+                aria-invalid={!!errors.recordedAt}
               />
+              {errors.recordedAt && (
+                <p className="text-xs text-destructive">{errors.recordedAt.message}</p>
+              )}
             </div>
 
             {/* Summary chips */}
@@ -489,10 +485,10 @@ export default function PointForm({
           <Button
             type="submit"
             form="point-form"
-            disabled={saving || uploading}
+            disabled={isSubmitting || uploading}
             className="flex-1"
           >
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {isEdit ? 'Salvar alterações' : 'Adicionar ponto'}
           </Button>
         </SheetFooter>
