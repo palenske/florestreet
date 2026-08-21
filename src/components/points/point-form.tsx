@@ -70,7 +70,6 @@ export default function PointForm({
   const {
     location: geoLocation,
     loading: geoLoading,
-    refining: geoRefining,
     warning: geoWarning,
     request: requestGeo,
   } = useGeolocation()
@@ -226,7 +225,7 @@ export default function PointForm({
                   {geoLoading ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                      {geoRefining ? 'Refinando...' : 'Localizando...'}
+                      Localizando...
                     </>
                   ) : (
                     <>

@@ -42,7 +42,6 @@ export default function MapView({
   const {
     location,
     loading: geoLoading,
-    refining,
     error: geoError,
     warning: geoWarning,
     request,
@@ -131,15 +130,6 @@ export default function MapView({
             </span>
             <span className="text-primary">•</span>
             <span>{formatAccuracy(location.accuracy)}</span>
-            {refining && (
-              <>
-                <span className="text-primary">•</span>
-                <span className="text-primary flex items-center gap-1">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  refinando
-                </span>
-              </>
-            )}
           </div>
         )}
 
